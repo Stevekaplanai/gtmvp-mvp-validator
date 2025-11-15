@@ -23,7 +23,7 @@ export async function sendMessage(
   options: ClaudeStreamOptions = {}
 ): Promise<string> {
   const {
-    model = process.env.CLAUDE_MODEL || 'claude-3-5-haiku-20241022',
+    model = process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001',
     maxTokens = 4096,
     temperature = 0.7,
     systemPrompt,
@@ -54,7 +54,7 @@ export async function* streamMessage(
   options: ClaudeStreamOptions = {}
 ): AsyncGenerator<string, void, unknown> {
   const {
-    model = process.env.CLAUDE_MODEL || 'claude-3-5-haiku-20241022',
+    model = process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001',
     maxTokens = 4096,
     temperature = 0.7,
     systemPrompt,
