@@ -11,17 +11,40 @@ export function KnowledgeChat() {
     {
       id: '1',
       role: 'assistant',
-      content: `Hi! I'm your GTMVP assistant. 👋
+      content: `## 👋 Welcome to GTMVP!
 
-I can answer questions about:
-- **AI Automation** - Customer service chatbots, lead qualification, content creation
-- **Paid Ads Management** - Google, Facebook, Instagram, YouTube campaigns
-- **MVP Development** - Launch your startup idea in weeks, not months
-- **Developer Matching** - Connect with the right technical talent
-- **Pricing & Packages** - Transparent pricing for all services
-- **Case Studies** - Past projects and results
+I'm your AI assistant, here to help you learn about our services and find the perfect solution for your business.
 
-What would you like to know about GTMVP?`,
+### 🎯 What I Can Help With
+
+**💡 AI Automation**
+- Customer service chatbots
+- Lead qualification systems
+- Content creation tools
+
+**📱 Paid Ads Management**
+- Google, Facebook, Instagram, YouTube
+- Performance optimization
+- Campaign strategy
+
+**🚀 MVP Development**
+- Launch in 90 days
+- $2,500 complete package
+- User validation included
+
+**👥 Developer Matching**
+- Vetted technical talent
+- SaaS specialists
+- Full-time or contract
+
+### 💬 Ask Me Anything!
+
+Try questions like:
+- "How much does MVP development cost?"
+- "What's included in AI automation?"
+- "Tell me about your case studies"
+
+**Ready to get started?** Let me know what you're interested in! 🎉`,
       timestamp: new Date(),
     },
   ]);
