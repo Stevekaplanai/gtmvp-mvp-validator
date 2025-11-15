@@ -13,32 +13,42 @@ export async function ingestGitHubRepos(repos: GitHubRepo[]): Promise<KnowledgeS
 
   for (const repo of repos) {
     try {
-      // In production, this would use GitHub API to fetch repo contents
-      // For now, creating structure that will work with real API
+      console.log(`Ingesting GitHub repo: ${repo.owner}/${repo.name}`);
 
-      const mockFiles = [
-        {
-          path: 'README.md',
-          content: `# ${repo.name}\n\nProject overview and documentation.`,
-        },
-        {
-          path: 'docs/architecture.md',
-          content: `# Architecture\n\nSystem architecture documentation.`,
-        },
-      ];
+      // Get README.md content from GitHub
+      const readmeContent = await fetchGitHubFile(repo.owner, repo.name, 'README.md', repo.branch);
 
-      for (const file of mockFiles) {
+      if (readmeContent) {
         sources.push({
-          id: `github-${repo.owner}-${repo.name}-${file.path}`,
+          id: `github-${repo.owner}-${repo.name}-README.md`,
           type: 'github',
-          content: file.content,
+          content: readmeContent,
           metadata: {
-            title: `${repo.name}/${file.path}`,
-            url: `https://github.com/${repo.owner}/${repo.name}/blob/main/${file.path}`,
-            category: inferCategory(file.path, file.content),
+            title: `${repo.name}/README.md`,
+            url: `https://github.com/${repo.owner}/${repo.name}/blob/${repo.branch || 'main'}/README.md`,
+            category: inferCategory('README.md', readmeContent),
             lastUpdated: new Date(),
           },
         });
+      }
+
+      // Optionally fetch other important files (docs, etc.)
+      const docFiles = ['docs/README.md', 'ARCHITECTURE.md', 'docs/architecture.md'];
+      for (const docPath of docFiles) {
+        const docContent = await fetchGitHubFile(repo.owner, repo.name, docPath, repo.branch);
+        if (docContent) {
+          sources.push({
+            id: `github-${repo.owner}-${repo.name}-${docPath.replace(/\//g, '-')}`,
+            type: 'github',
+            content: docContent,
+            metadata: {
+              title: `${repo.name}/${docPath}`,
+              url: `https://github.com/${repo.owner}/${repo.name}/blob/${repo.branch || 'main'}/${docPath}`,
+              category: inferCategory(docPath, docContent),
+              lastUpdated: new Date(),
+            },
+          });
+        }
       }
     } catch (error) {
       console.error(`Error ingesting repo ${repo.owner}/${repo.name}:`, error);
@@ -46,6 +56,45 @@ export async function ingestGitHubRepos(repos: GitHubRepo[]): Promise<KnowledgeS
   }
 
   return sources;
+}
+
+async function fetchGitHubFile(
+  owner: string,
+  repo: string,
+  path: string,
+  branch: string = 'main'
+): Promise<string | null> {
+  try {
+    // Use GitHub API to fetch file content
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`;
+
+    const response = await fetch(url, {
+      headers: {
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'GTMVP-RAG-System',
+      },
+    });
+
+    if (!response.ok) {
+      // Try alternative branch if main doesn't work
+      if (branch === 'main' && response.status === 404) {
+        return fetchGitHubFile(owner, repo, path, 'master');
+      }
+      return null;
+    }
+
+    const data = await response.json();
+
+    // GitHub API returns base64-encoded content
+    if (data.content) {
+      return Buffer.from(data.content, 'base64').toString('utf-8');
+    }
+
+    return null;
+  } catch (error) {
+    console.error(`Error fetching ${owner}/${repo}/${path}:`, error);
+    return null;
+  }
 }
 
 function inferCategory(path: string, content: string): 'service' | 'pricing' | 'case-study' | 'technical' {

@@ -3,6 +3,7 @@
 import { KnowledgeSource, ChatbotContext } from '../types';
 import { ingestGTMVPRepos } from './github-ingest';
 import { ingestGTMVPNotion } from './notion-ingest';
+import { ingestGTMVPWebsite } from './website-ingest';
 
 class KnowledgeBase {
   private sources: KnowledgeSource[] = [];
@@ -15,12 +16,13 @@ class KnowledgeBase {
 
     try {
       // Ingest from all sources
-      const [githubSources, notionSources] = await Promise.all([
+      const [githubSources, notionSources, websiteSources] = await Promise.all([
         ingestGTMVPRepos(),
         ingestGTMVPNotion(),
+        ingestGTMVPWebsite(),
       ]);
 
-      this.sources = [...githubSources, ...notionSources];
+      this.sources = [...githubSources, ...notionSources, ...websiteSources];
       this.initialized = true;
 
       console.log(`Knowledge base initialized with ${this.sources.length} sources`);
@@ -89,7 +91,8 @@ class KnowledgeBase {
       byType: {
         github: this.sources.filter(s => s.type === 'github').length,
         notion: this.sources.filter(s => s.type === 'notion').length,
-        manual: this.sources.filter(s => s.type === 'manual').length,
+        website: this.sources.filter(s => s.type === 'manual' && s.id.startsWith('website-')).length,
+        manual: this.sources.filter(s => s.type === 'manual' && !s.id.startsWith('website-')).length,
       },
       byCategory: {
         service: this.sources.filter(s => s.metadata.category === 'service').length,
