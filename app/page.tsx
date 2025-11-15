@@ -12,7 +12,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'validator' | 'knowledge'>('validator');
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden flex flex-col">
       {/* Header */}
       <header className="relative z-10 glass border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -94,10 +94,18 @@ export default function Home() {
       </div>
 
       {/* Main Content */}
-      <main className="relative z-10 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <Card className="glass border-white/10 overflow-hidden">
-          {activeTab === 'validator' ? <ValidatorChat /> : <KnowledgeChat />}
-        </Card>
+      <main className="relative z-10 flex-1 flex flex-col">
+        {activeTab === 'validator' ? (
+          <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 flex flex-col">
+            <Card className="glass border-white/10 overflow-hidden flex-1 flex flex-col">
+              <ValidatorChat />
+            </Card>
+          </div>
+        ) : (
+          <div className="flex-1 flex flex-col">
+            <KnowledgeChat />
+          </div>
+        )}
       </main>
 
       {/* Footer */}

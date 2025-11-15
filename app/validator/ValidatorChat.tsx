@@ -84,7 +84,7 @@ Let's start simple: **What's your MVP idea?** Describe it in a sentence or two.`
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-280px)]">
+    <div className="flex flex-col h-full">
       {/* Welcome Header */}
       <div className="glass border-b border-white/10 p-6">
         <div className="flex items-center gap-3">

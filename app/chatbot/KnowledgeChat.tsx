@@ -3,10 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { ChatMessage } from '../components/ChatMessage';
 import { ChatInput } from '../components/ChatInput';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Message } from '@/lib/types';
-import { MessageCircle } from 'lucide-react';
 
 export function KnowledgeChat() {
   const [messages, setMessages] = useState<Message[]>([
@@ -29,9 +27,12 @@ What would you like to know about GTMVP?`,
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   };
 
   useEffect(() => {
@@ -98,61 +99,67 @@ What would you like to know about GTMVP?`,
   ];
 
   return (
-    <div className="flex flex-col h-[calc(100vh-280px)]">
-      {/* Header */}
-      <div className="glass border-b border-white/10 p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600">
-            <MessageCircle className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-white">GTMVP Assistant</h2>
-            <p className="text-sm text-gray-400">Ask anything about our services</p>
-          </div>
-        </div>
+    <div className="flex flex-col h-full">
+      {/* Messages Container - Full scrollable area */}
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto px-4 py-6"
+        style={{ scrollBehavior: 'smooth' }}
+      >
+        {/* Center content with max-width like Claude */}
+        <div className="max-w-3xl mx-auto space-y-6">
+          {/* Quick Questions - Show only when no messages yet */}
+          {messages.length === 1 && (
+            <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="flex flex-wrap gap-2 justify-center">
+                {quickQuestions.map((question) => (
+                  <Button
+                    key={question}
+                    onClick={() => handleSend(question)}
+                    disabled={isLoading}
+                    variant="outline"
+                    size="sm"
+                    className="glass border-white/20 hover:border-purple-500/50 hover:bg-purple-500/10 text-xs transition-all"
+                  >
+                    {question}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
 
-        {/* Quick Questions */}
-        <div className="flex flex-wrap gap-2">
-          {quickQuestions.map((question) => (
-            <Button
-              key={question}
-              onClick={() => handleSend(question)}
-              disabled={isLoading}
-              variant="outline"
-              size="sm"
-              className="glass border-white/20 hover:border-purple-500/50 hover:bg-purple-500/10 text-xs transition-all"
-            >
-              {question}
-            </Button>
+          {/* Messages */}
+          {messages.map(message => (
+            <ChatMessage key={message.id} message={message} />
           ))}
+
+          {/* Loading indicator */}
+          {isLoading && (
+            <div className="flex justify-start animate-in slide-in-from-bottom-2">
+              <div className="glass border-white/10 rounded-2xl px-5 py-4">
+                <div className="flex gap-2">
+                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
         </div>
       </div>
 
-      {/* Messages */}
-      <ScrollArea className="flex-1 p-6">
-        {messages.map(message => (
-          <ChatMessage key={message.id} message={message} />
-        ))}
-        {isLoading && (
-          <div className="flex justify-start animate-in slide-in-from-bottom-2">
-            <div className="glass border-white/10 rounded-2xl px-5 py-4">
-              <div className="flex gap-2">
-                <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-              </div>
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </ScrollArea>
-
-      {/* Input */}
-      <ChatInput
-        onSend={handleSend}
-        disabled={isLoading}
-        placeholder="Ask about GTMVP services..."
-      />
+      {/* Input - Fixed at bottom */}
+      <div className="border-t border-white/10">
+        <div className="max-w-3xl mx-auto px-4">
+          <ChatInput
+            onSend={handleSend}
+            disabled={isLoading}
+            placeholder="Ask about GTMVP services..."
+          />
+        </div>
+      </div>
     </div>
   );
 }
