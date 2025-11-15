@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendMessage, VALIDATOR_SYSTEM_PROMPT, KNOWLEDGE_SYSTEM_PROMPT } from '@/lib/claude/client';
+import { ragSystem } from '@/lib/rag/rag-system';
 import { z } from 'zod';
 
 const chatRequestSchema = z.object({
@@ -17,9 +18,28 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { messages, mode } = chatRequestSchema.parse(body);
 
-    const systemPrompt = mode === 'validator'
+    let systemPrompt = mode === 'validator'
       ? VALIDATOR_SYSTEM_PROMPT
       : KNOWLEDGE_SYSTEM_PROMPT;
+
+    // For knowledge mode, use RAG to enhance responses
+    if (mode === 'knowledge' && messages.length > 0) {
+      const lastUserMessage = messages[messages.length - 1];
+      if (lastUserMessage.role === 'user') {
+        try {
+          // Query RAG system for relevant context
+          const { context, sources } = await ragSystem.query(lastUserMessage.content, 3);
+
+          if (context) {
+            // Enhance system prompt with RAG context
+            systemPrompt += `\n\n**Relevant Knowledge Base Context:**\n${context}\n\nUse the above context to provide accurate, specific answers. Cite the sources when relevant.`;
+          }
+        } catch (error) {
+          console.error('RAG query error:', error);
+          // Continue without RAG if it fails
+        }
+      }
+    }
 
     const response = await sendMessage(messages, {
       systemPrompt,
@@ -35,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid request format', details: error.errors },
+        { error: 'Invalid request format', details: error.issues },
         { status: 400 }
       );
     }
