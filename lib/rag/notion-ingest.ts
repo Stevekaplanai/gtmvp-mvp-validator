@@ -37,7 +37,7 @@ export async function ingestNotionWorkspace(workspaceId: string): Promise<Knowle
     console.log(`Found ${response.results.length} pages in Notion workspace`);
 
     for (const page of response.results) {
-      if (page.object === 'page') {
+      if (page.object === 'page' && 'last_edited_time' in page) {
         try {
           // Get page title
           const title = getPageTitle(page);
