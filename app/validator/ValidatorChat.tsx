@@ -3,14 +3,16 @@
 import { useState, useRef, useEffect } from 'react';
 import { ChatMessage } from '../components/ChatMessage';
 import { ChatInput } from '../components/ChatInput';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Message } from '@/lib/types';
+import { Sparkles } from 'lucide-react';
 
 export function ValidatorChat() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       role: 'assistant',
-      content: `Welcome to the GTMVP MVP Validator! 👋
+      content: `Welcome to the GTMVP MVP Validator! ✨
 
 I'm here to help you validate your startup idea with AI-powered market research. I'll ask you a few strategic questions about your idea, then conduct real-time research across Reddit, GitHub, YouTube, and technical documentation to give you an honest, data-backed assessment.
 
@@ -30,7 +32,6 @@ Let's start simple: **What's your MVP idea?** Describe it in a sentence or two.`
   }, [messages]);
 
   const handleSend = async (content: string) => {
-    // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
@@ -42,7 +43,6 @@ Let's start simple: **What's your MVP idea?** Describe it in a sentence or two.`
     setIsLoading(true);
 
     try {
-      // Call chat API
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -84,31 +84,44 @@ Let's start simple: **What's your MVP idea?** Describe it in a sentence or two.`
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-280px)] bg-card-bg border border-border rounded-xl overflow-hidden">
-      {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+    <div className="flex flex-col h-[calc(100vh-280px)]">
+      {/* Welcome Header */}
+      <div className="glass border-b border-white/10 p-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600">
+            <Sparkles className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-white">MVP Validator</h2>
+            <p className="text-sm text-gray-400">AI-powered idea validation with real-time research</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <ScrollArea className="flex-1 p-6">
         {messages.map(message => (
           <ChatMessage key={message.id} message={message} />
         ))}
         {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-card-bg border border-border rounded-2xl px-4 py-3">
-              <div className="flex gap-1">
-                <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          <div className="flex justify-start animate-in slide-in-from-bottom-2">
+            <div className="glass border-white/10 rounded-2xl px-5 py-4">
+              <div className="flex gap-2">
+                <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
             </div>
           </div>
         )}
         <div ref={messagesEndRef} />
-      </div>
+      </ScrollArea>
 
-      {/* Chat Input */}
+      {/* Input */}
       <ChatInput
         onSend={handleSend}
         disabled={isLoading}
-        placeholder="Type your answer..."
+        placeholder="Describe your MVP idea..."
       />
     </div>
   );

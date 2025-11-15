@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, FormEvent, KeyboardEvent } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Send, Loader2 } from 'lucide-react';
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -19,7 +22,7 @@ export function ChatInput({ onSend, disabled, placeholder = 'Type your message..
     }
   };
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e as unknown as FormEvent);
@@ -27,28 +30,39 @@ export function ChatInput({ onSend, disabled, placeholder = 'Type your message..
   };
 
   return (
-    <form onSubmit={handleSubmit} className="border-t border-border bg-card-bg p-4">
-      <div className="flex gap-2">
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          disabled={disabled}
-          placeholder={placeholder}
-          className="flex-1 bg-background border border-border rounded-lg px-4 py-3 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent resize-none"
-          rows={1}
-          style={{ minHeight: '52px', maxHeight: '150px' }}
-        />
-        <button
+    <form onSubmit={handleSubmit} className="glass border-t border-white/10 p-4">
+      <div className="flex gap-3 items-center max-w-4xl mx-auto">
+        <div className="flex-1 relative">
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={disabled}
+            placeholder={placeholder}
+            className="glass border-white/20 bg-white/5 pr-4 h-12 text-white placeholder:text-gray-500 focus-visible:ring-blue-500/50 focus-visible:border-blue-500/50 transition-all"
+          />
+        </div>
+        <Button
           type="submit"
           disabled={disabled || !input.trim()}
-          className="px-6 py-3 bg-accent hover:bg-accent-hover text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="glow-on-hover h-12 px-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 transition-all"
+          size="lg"
         >
-          Send
-        </button>
+          {disabled ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Thinking...
+            </>
+          ) : (
+            <>
+              <Send className="w-4 h-4 mr-2" />
+              Send
+            </>
+          )}
+        </Button>
       </div>
-      <div className="text-xs text-muted-foreground mt-2">
-        Press Enter to send, Shift+Enter for new line
+      <div className="text-xs text-center text-gray-500 mt-2">
+        Press Enter to send • Shift+Enter for new line
       </div>
     </form>
   );
