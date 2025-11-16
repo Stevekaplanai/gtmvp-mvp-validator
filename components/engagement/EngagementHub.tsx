@@ -247,7 +247,12 @@ export function EngagementHub({
                 )}
 
                 {activeSection === 'comparison' && (
-                  <StartupComparison yourScore={score} category={idea.category} />
+                  <StartupComparison
+                    yourScore={score}
+                    category={idea.category}
+                    ideaName={idea.name}
+                    dimensions={dimensions}
+                  />
                 )}
 
                 {activeSection === 'predict' && (

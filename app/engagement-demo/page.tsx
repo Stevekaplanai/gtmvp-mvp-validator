@@ -239,10 +239,15 @@ export default function EngagementDemoPage() {
                 <Card className="glass border-white/10 p-6">
                   <h2 className="text-2xl font-bold text-white mb-2">Startup Comparison</h2>
                   <p className="text-gray-400 mb-6">
-                    See how your idea compares to famous successful startups
+                    AI-powered research comparing your idea to real successful startups
                   </p>
                 </Card>
-                <StartupComparison yourScore={mockIdea.score} category={mockIdea.category} />
+                <StartupComparison
+                  yourScore={mockIdea.score}
+                  category={mockIdea.category}
+                  ideaName={mockIdea.name}
+                  dimensions={mockIdea.dimensions}
+                />
               </div>
             )}
 
