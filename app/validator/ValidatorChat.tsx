@@ -12,11 +12,32 @@ export function ValidatorChat() {
     {
       id: '1',
       role: 'assistant',
-      content: `Welcome to the GTMVP MVP Validator! ✨
+      content: `## 🎯 Welcome to GTMVP MVP Validator
 
-I'm here to help you validate your startup idea with AI-powered market research. I'll ask you a few strategic questions about your idea, then conduct real-time research across Reddit, GitHub, YouTube, and technical documentation to give you an honest, data-backed assessment.
+Get **ideabrowser.com-level analysis** for your startup idea with our AI-powered validation system.
 
-Let's start simple: **What's your MVP idea?** Describe it in a sentence or two.`,
+### 📊 What You Get:
+
+**Level 1: Quick Validation** (2-3 min)
+- 6-dimensional scorecard (Market Opportunity, Problem Severity, Technical Feasibility, Market Timing, Founder Fit, Monetization)
+- Clear verdict: BUILD ✅ / PIVOT ⚠️ / SKIP ❌
+- Key insights and immediate concerns
+
+**Level 2: Deep Dive** (10-15 min)
+- Community signals from Reddit & YouTube
+- Competitive landscape analysis
+- Market sizing (TAM/SAM/SOM)
+- Revenue projections & GTM strategy
+
+**Level 3: Full Analysis** (20-30 min)
+- Complete 40-step validation report
+- Detailed pricing strategy with tiers
+- Multi-channel GTM tactics
+- 90-day execution roadmap
+
+### 💡 Ready to validate your idea?
+
+**Describe your MVP idea in 1-2 sentences.** I'll instantly provide a comprehensive assessment and you can choose how deep to go.`,
       timestamp: new Date(),
     },
   ]);
