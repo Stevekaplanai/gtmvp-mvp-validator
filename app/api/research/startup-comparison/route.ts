@@ -5,107 +5,109 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-interface StartupComparisonRequest {
-  score: number;
-  category?: string;
-  ideaName?: string;
-  dimensions?: {
-    marketOpportunity: number;
-    problemSeverity: number;
-    technicalFeasibility: number;
-    marketTiming: number;
-    founderFit: number;
-    monetizationPotential: number;
-  };
+interface ResearchedStartup {
+  name: string;
+  earlyScore: number;
+  currentValuation: string;
+  category: string;
+  foundingStory: string;
+  keyLesson: string;
 }
 
-export async function POST(req: NextRequest) {
+interface ResearchData {
+  startups: ResearchedStartup[];
+  percentileRank: number;
+  closestMatch: string;
+  insights: string[];
+}
+
+export async function POST(request: NextRequest) {
   try {
-    const body: StartupComparisonRequest = await req.json();
-    const { score, category = 'General', ideaName = '', dimensions } = body;
+    const body = await request.json();
+    const { score, category, ideaName, dimensions } = body;
 
-    const prompt = `You are a startup research analyst. Given a startup idea with the following validation metrics:
-
-Score: ${score}/100
-Category: ${category}
-${ideaName ? `Idea: ${ideaName}` : ''}
-${dimensions ? `
-Dimensions:
+    const ideaContext = `User's Idea Score: ${score}/100
+Category: ${category || 'General'}
+${ideaName ? `Idea Name/Description: ${ideaName}` : ''}
+${dimensions ? `Dimension Scores:
 - Market Opportunity: ${dimensions.marketOpportunity}/100
 - Problem Severity: ${dimensions.problemSeverity}/100
 - Technical Feasibility: ${dimensions.technicalFeasibility}/100
 - Market Timing: ${dimensions.marketTiming}/100
 - Founder Fit: ${dimensions.founderFit}/100
-- Monetization Potential: ${dimensions.monetizationPotential}/100
-` : ''}
-
-Research and identify 5-8 real successful startups that:
-1. Operate in similar or adjacent markets to "${category}"
-2. Had comparable early-stage validation scores (within ±15 points of ${score})
-3. Faced similar challenges or opportunities
-
-For each startup, provide:
-- Name
-- Early-stage score estimate (0-100, based on their initial conditions)
-- Current valuation (approximate, in billions)
-- Category/Industry
-- Key founding insight or story
-- Relevant lesson learned
-
-Also provide:
-- Percentile ranking (where does ${score} rank compared to these successful startups)
-- Closest match (which startup is most similar)
-- Key insights (3-4 actionable insights from these comparisons)
-
-Format your response as a valid JSON object with this structure:
-{
-  "startups": [
-    {
-      "name": "string",
-      "earlyScore": number,
-      "currentValuation": "string",
-      "category": "string",
-      "foundingStory": "string",
-      "keyLesson": "string"
-    }
-  ],
-  "percentileRank": number,
-  "closestMatch": "string",
-  "insights": ["string", "string", "string"]
-}
-
-Respond ONLY with the JSON object, no additional text.`;
+- Monetization Potential: ${dimensions.monetizationPotential}/100` : ''}`.trim();
 
     const message = await anthropic.messages.create({
-      model: process.env.CLAUDE_MODEL || 'claude-3-5-haiku-20241022',
+      model: 'claude-3-5-haiku-20241022',
       max_tokens: 2048,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
+      temperature: 0.7,
+      messages: [{
+        role: 'user',
+        content: `You are a startup research analyst. Research 5-8 successful startups that had similar characteristics to the user's idea when they were just starting out.
+
+${ideaContext}
+
+Based on this score and characteristics, find real successful startups that had similar early validation scores, were in similar categories, or faced similar challenges.
+
+For each startup, provide:
+1. Name (real company)
+2. Estimated early validation score (0-100)
+3. Current valuation (use real data)
+4. Category
+5. Founding story (one compelling sentence)
+6. Key lesson (one sentence)
+
+Also provide percentile rank, closest match startup name, and 3-4 insights.
+
+CRITICAL: Return ONLY valid JSON in this exact format:
+{
+  "startups": [{
+    "name": "Company Name",
+    "earlyScore": 75,
+    "currentValuation": "$10B",
+    "category": "SaaS",
+    "foundingStory": "Started in a garage during recession",
+    "keyLesson": "Focused on one problem exceptionally well"
+  }],
+  "percentileRank": 72,
+  "closestMatch": "Company Name",
+  "insights": ["insight 1", "insight 2"]
+}`,
+      }],
     });
 
-    const responseText = message.content[0].type === 'text'
-      ? message.content[0].text
-      : '';
-
-    // Parse JSON response from Claude
-    let researchData;
-    try {
-      // Try to extract JSON from response (in case Claude adds extra text)
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      researchData = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(responseText);
-    } catch (parseError) {
-      console.error('Failed to parse Claude response:', responseText);
-      throw new Error('Invalid response format from AI');
+    const content = message.content[0];
+    if (content.type !== 'text') {
+      throw new Error('Unexpected response type from Claude');
     }
+
+    let jsonText = content.text.trim();
+    if (jsonText.startsWith('```json')) {
+      jsonText = jsonText.replace(/^```json
+/, '').replace(/
+```$/, '');
+    } else if (jsonText.startsWith('```')) {
+      jsonText = jsonText.replace(/^```
+/, '').replace(/
+```$/, '');
+    }
+
+    const researchData: ResearchData = JSON.parse(jsonText);
+
+    if (!researchData.startups || !Array.isArray(researchData.startups) || researchData.startups.length === 0) {
+      throw new Error('Invalid research data structure');
+    }
+
+    researchData.startups.forEach((startup, index) => {
+      if (!startup.name || !startup.category || !startup.foundingStory || !startup.keyLesson) {
+        throw new Error(`Invalid startup data at index ${index}`);
+      }
+      startup.earlyScore = Number(startup.earlyScore) || 50;
+    });
 
     return NextResponse.json({
       success: true,
       data: researchData,
-      cached: false,
     });
 
   } catch (error) {
@@ -113,7 +115,7 @@ Respond ONLY with the JSON object, no additional text.`;
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to generate startup comparison',
+        error: error instanceof Error ? error.message : 'Failed to generate startup research',
       },
       { status: 500 }
     );

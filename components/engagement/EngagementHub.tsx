@@ -18,6 +18,7 @@ import {
   Users,
   Flame,
   ChevronRight,
+  Lightbulb,
 } from 'lucide-react';
 
 // Import all engagement components
@@ -31,6 +32,7 @@ import { RiskRewardMatrix } from './RiskRewardMatrix';
 import { PredictiveScore } from './PredictiveScore';
 import { CollaborationHub } from './CollaborationHub';
 import { LimitedTimeFeatures } from './LimitedTimeFeatures';
+import { VisualGuidance } from './VisualGuidance';
 
 interface EngagementHubProps {
   idea: {
@@ -91,6 +93,7 @@ export function EngagementHub({
 
   const sections = [
     { id: 'overview', label: 'Results', icon: Sparkles },
+    { id: 'guidance', label: 'Guided Thinking', icon: Lightbulb },
     { id: 'comparison', label: 'Compare', icon: TrendingUp },
     { id: 'predict', label: 'Predict', icon: Zap },
     { id: 'matrix', label: 'Matrix', icon: Target },
@@ -201,7 +204,16 @@ export function EngagementHub({
 
                     <Card className="glass border-white/10 p-6">
                       <h3 className="text-lg font-semibold text-white mb-4">What's Next?</h3>
-                      <div className="grid md:grid-cols-3 gap-4">
+                      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <Button
+                          variant="outline"
+                          className="h-auto py-4 flex flex-col gap-2 border-yellow-500/50 bg-yellow-500/10 hover:bg-yellow-500/20"
+                          onClick={() => setActiveSection('guidance')}
+                        >
+                          <Lightbulb className="w-6 h-6 text-yellow-400" />
+                          <span className="text-yellow-400 font-semibold">Guided Thinking</span>
+                          <span className="text-xs text-gray-400">Deep dive into your idea</span>
+                        </Button>
                         <Button
                           variant="outline"
                           className="h-auto py-4 flex flex-col gap-2"
@@ -243,6 +255,26 @@ export function EngagementHub({
                         </Button>
                       </div>
                     </Card>
+                  </div>
+                )}
+
+                {activeSection === 'guidance' && (
+                  <div className="space-y-4">
+                    <div className="text-center mb-6">
+                      <h3 className="text-2xl font-bold text-white mb-2">
+                        Guided Thinking Framework
+                      </h3>
+                      <p className="text-gray-400 max-w-2xl mx-auto">
+                        Work through these critical questions to deeply understand your startup idea.
+                        Each question is designed to help you think like successful founders.
+                      </p>
+                    </div>
+                    <VisualGuidance
+                      onComplete={(insights) => {
+                        console.log('Guidance insights:', insights);
+                        unlockAchievement('thoughtful');
+                      }}
+                    />
                   </div>
                 )}
 
