@@ -242,7 +242,7 @@ export default function EngagementDemoPage() {
                     See how your idea compares to famous successful startups
                   </p>
                 </Card>
-                <StartupComparison userScore={mockIdea.score} userIdea={mockIdea.name} />
+                <StartupComparison yourScore={mockIdea.score} category={mockIdea.category} />
               </div>
             )}
 
