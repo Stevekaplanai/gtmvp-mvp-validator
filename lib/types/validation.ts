@@ -1,4 +1,4 @@
-// Enhanced validation types for ideabrowser-level analysis
+// Enhanced validation types for comprehensive market analysis
 
 export interface ValidationScore {
   overall: number; // 0-100

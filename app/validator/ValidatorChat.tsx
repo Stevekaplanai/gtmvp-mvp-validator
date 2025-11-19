@@ -16,7 +16,7 @@ export function ValidatorChat() {
       role: 'assistant',
       content: `## 🎯 Welcome to GTMVP MVP Validator
 
-Get **ideabrowser.com-level analysis** for your startup idea with our AI-powered validation system.
+Get **comprehensive market analysis** for your startup idea with our AI-powered validation system.
 
 ### 📊 What You Get:
 
