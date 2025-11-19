@@ -65,15 +65,22 @@ async function fetchGitHubFile(
   branch: string = 'main'
 ): Promise<string | null> {
   try {
-    // Use GitHub API to fetch file content
+    // Use GitHub API to fetch file content with timeout
     const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
     const response = await fetch(url, {
       headers: {
         'Accept': 'application/vnd.github.v3+json',
         'User-Agent': 'GTMVP-RAG-System',
+        ...(process.env.GITHUB_TOKEN ? { 'Authorization': `token ${process.env.GITHUB_TOKEN}` } : {}),
       },
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       // Try alternative branch if main doesn't work
@@ -92,7 +99,10 @@ async function fetchGitHubFile(
 
     return null;
   } catch (error) {
-    console.error(`Error fetching ${owner}/${repo}/${path}:`, error);
+    // Silently fail for non-existent repos
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.log(`Timeout fetching ${owner}/${repo}/${path}`);
+    }
     return null;
   }
 }
