@@ -83,13 +83,9 @@ CRITICAL: Return ONLY valid JSON in this exact format:
 
     let jsonText = content.text.trim();
     if (jsonText.startsWith('```json')) {
-      jsonText = jsonText.replace(/^```json
-/, '').replace(/
-```$/, '');
+      jsonText = jsonText.replace(/^```json\n?/, '').replace(/\n?```$/, '');
     } else if (jsonText.startsWith('```')) {
-      jsonText = jsonText.replace(/^```
-/, '').replace(/
-```$/, '');
+      jsonText = jsonText.replace(/^```\n?/, '').replace(/\n?```$/, '');
     }
 
     const researchData: ResearchData = JSON.parse(jsonText);
