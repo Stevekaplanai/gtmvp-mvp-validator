@@ -129,10 +129,11 @@ function inferCategory(path: string, content: string): 'service' | 'pricing' | '
 // Function to fetch specific repos for GTMVP
 export async function ingestGTMVPRepos(): Promise<KnowledgeSource[]> {
   const repos: GitHubRepo[] = [
-    { owner: 'stevekaplanai', name: 'gtmvp-automation' },
-    { owner: 'stevekaplanai', name: 'gtmvp-ads-manager' },
-    { owner: 'GTMVP', name: 'client-projects' },
-    { owner: 'GTMVP', name: 'mvp-accelerator' },
+    { owner: 'Stevekaplanai', name: 'google-ai-mcp-server' },
+    { owner: 'Stevekaplanai', name: 'gtmvp-mvp-validator' },
+    { owner: 'Stevekaplanai', name: 'product-description-generator' },
+    { owner: 'Stevekaplanai', name: 'promptforge-mcp-server' },
+    { owner: 'Stevekaplanai', name: 'stevekaplanai' },
   ];
 
   return ingestGitHubRepos(repos);
